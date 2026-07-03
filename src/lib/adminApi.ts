@@ -292,7 +292,7 @@ export const adminApi = {
     const url = role === 'driver'
       ? `/api/drivers/${userId}/assign-office/`
       : `/api/workers/${userId}/assign-office/`;
-    const data = { office_id: officeId };
+    const data = { office: officeId };
 
     console.log('assignUserToOffice request', { url, data });
 
