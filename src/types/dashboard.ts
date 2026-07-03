@@ -11,24 +11,45 @@ export interface User {
     updatedAt: string;
 }
 
+export interface Office {
+    id: number;
+    name: string;
+    address: string;
+    latitude: string;
+    longitude: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PaginatedResponse<T> {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: T[];
+}
+
+export interface OfficeAssignmentProfile {
+    id: number;
+    user_id: number;
+    full_name: string;
+    phone: string;
+    office: number | null;
+    skills?: string;
+    license_number?: string;
+    rating: number;
+    availability: boolean;
+    suspended_until: string | null;
+    current_latitude: number | null;
+    current_longitude: number | null;
+    location_updated_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface DriverOfficeAssignmentResponse {
     detail: string;
-    driver: {
-        id: number;
-        user_id: number;
-        full_name: string;
-        phone: string;
-        office: number | null;
-        license_number: string;
-        rating: number;
-        availability: boolean;
-        suspended_until: string | null;
-        current_latitude: number | null;
-        current_longitude: number | null;
-        location_updated_at: string | null;
-        created_at: string;
-        updated_at: string;
-    };
+    driver?: OfficeAssignmentProfile;
+    worker?: OfficeAssignmentProfile;
 }
 
 export interface Driver extends User {

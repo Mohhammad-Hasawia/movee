@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext1';
 import { adminApi } from '@/lib/adminApi';
-import { User, Driver } from '@/types/dashboard';
+import { User, Driver, Office } from '@/types/dashboard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +33,8 @@ export const AdminUsers: React.FC = () => {
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [selectedOffice, setSelectedOffice] = useState<number>(1);
   const [assignTargetUserId, setAssignTargetUserId] = useState<number | null>(null);
+  const [offices, setOffices] = useState<Office[]>([]);
+  const [officesLoading, setOfficesLoading] = useState(false);
 
   const translations = {
     en: {
@@ -160,8 +162,24 @@ export const AdminUsers: React.FC = () => {
     }
     setIsAuthenticated(true);
     fetchUsers();
+    fetchOffices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
+
+  const fetchOffices = async () => {
+    setOfficesLoading(true);
+    try {
+      const data = await adminApi.getOffices();
+      setOffices(data);
+      if (data.length > 0 && !data.some(o => o.id === selectedOffice)) {
+        setSelectedOffice(data[0].id);
+      }
+    } catch (error) {
+      console.error('Failed to fetch offices:', error);
+    } finally {
+      setOfficesLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('moveline_token');
@@ -192,7 +210,7 @@ export const AdminUsers: React.FC = () => {
       const officeToAssign = selectedOffice;
       const role = currentUser?.role === 'driver' ? 'driver' : 'worker';
       const response = await adminApi.assignUserToOffice(numericUserId, role, officeToAssign);
-      const nextOffice = response.driver?.office ?? null;
+      const nextOffice = response.driver?.office ?? response.worker?.office ?? null;
 
       setDrivers((prev) => prev.map((user) => (Number(user.id) === numericUserId ? { ...user, office: nextOffice } : user)));
       setWorkers((prev) => prev.map((user) => (Number(user.id) === numericUserId ? { ...user, office: nextOffice } : user)));
@@ -598,9 +616,12 @@ export const AdminUsers: React.FC = () => {
                   <SelectValue placeholder={t.selectOffice} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">Office 1</SelectItem>
-                  <SelectItem value="2">Office 2</SelectItem>
-                  <SelectItem value="3">Office 3</SelectItem>
+                  {officesLoading && <SelectItem value="loading" disabled>...</SelectItem>}
+                  {offices.map((office) => (
+                    <SelectItem key={office.id} value={String(office.id)}>
+                      {office.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

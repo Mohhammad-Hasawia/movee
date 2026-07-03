@@ -12,6 +12,8 @@ import {
   WorkerApplicant,
   InterviewSchedulePayload,
   DriverOfficeAssignmentResponse,
+  Office,
+  PaginatedResponse,
   AdminOrderRating,
   AdminOrderRatingsResponse,
 } from '@/types/dashboard';
@@ -271,6 +273,11 @@ export const adminApi = {
     return null;
   },
 
+  getOffices: async (): Promise<Office[]> => {
+    const response = await api.get<PaginatedResponse<Office>>('/api/offices/');
+    return response.data.results;
+  },
+
   updateUser: async (userId: number, updates: Partial<User>): Promise<User> => {
     console.warn('updateUser called but mock data removed. Implement real API call.');
     throw new Error('updateUser not implemented - mock data removed');
@@ -281,11 +288,11 @@ export const adminApi = {
     console.log(`User ${userId} deleted`);
   },
 
-  assignUserToOffice: async (userId: number, role: 'driver' | 'worker', office: number): Promise<DriverOfficeAssignmentResponse> => {
+  assignUserToOffice: async (userId: number, role: 'driver' | 'worker', officeId: number): Promise<DriverOfficeAssignmentResponse> => {
     const url = role === 'driver'
       ? `/api/drivers/${userId}/assign-office/`
       : `/api/workers/${userId}/assign-office/`;
-    const data = { office };
+    const data = { office_id: officeId };
 
     console.log('assignUserToOffice request', { url, data });
 
